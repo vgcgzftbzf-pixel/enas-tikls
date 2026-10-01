@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Izlaušanās istaba: Ēnas tīkls</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e7eef6; --grid:rgba(22,62,110,.09); --panel:#f8fbfe; --panel2:#eef3f9;
+  --ink:#0f2742; --muted:#4f6680; --line:#b9cbdd; --plan:#1d4f8a;
+  --safety:#f2b705; --safety-ink:#231a00; --ok:#147a52; --bad:#b4232c;
+  --shadow:0 12px 32px rgba(15,39,66,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1f3a; --grid:rgba(150,200,255,.07); --panel:#11294a; --panel2:#163257;
+    --ink:#e6f0fb; --muted:#9db6d3; --line:#2b4c78; --plan:#8cc4ff;
+    --safety:#ffc928; --safety-ink:#1f1700; --ok:#4fd39a; --bad:#ff6b74;
+    --shadow:0 12px 32px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1f3a; --grid:rgba(150,200,255,.07); --panel:#11294a; --panel2:#163257;
+  --ink:#e6f0fb; --muted:#9db6d3; --line:#2b4c78; --plan:#8cc4ff;
+  --safety:#ffc928; --safety-ink:#1f1700; --ok:#4fd39a; --bad:#ff6b74;
+  --shadow:0 12px 32px rgba(0,0,0,.4);
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*,*::before,*::after{box-sizing:inherit}
+body{
+  margin:0;color:var(--ink);background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  font-size:17px;line-height:1.55;min-height:100vh;
+}
+body.lock{overflow:hidden}
+h1,h2,h3,.disp{font-family:'Chakra Petch','Trebuchet MS',system-ui,sans-serif;line-height:1.15;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--safety);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:16px}
+img{max-width:100%}
+
+/* START */
+.start{max-width:720px;margin:4vh auto;padding:16px}
+.start h1{font-size:clamp(2.2rem,7vw,3.6rem);letter-spacing:-.01em}
+.start .lead{font-size:1.15rem;color:var(--muted);margin:14px 0 22px;max-width:60ch}
+.tape{height:14px;border-radius:3px;background:repeating-linear-gradient(-45deg,var(--safety) 0 14px,var(--safety-ink) 14px 28px);margin:18px 0}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow)}
+.rules{margin:0;padding-left:1.2em}
+.rules li{margin:4px 0}
+.field{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.field input{flex:1 1 220px;padding:14px 16px;border-radius:10px;border:2px solid var(--line);background:var(--panel2);color:var(--ink);font:inherit;font-size:1.1rem}
+.btn{border:2px solid var(--line);background:var(--panel2);border-radius:10px;padding:12px 18px;font-weight:600}
+.btn:hover{border-color:var(--plan)}
+.btn.primary{background:var(--safety);border-color:var(--safety);color:var(--safety-ink);font-family:'Chakra Petch',sans-serif;font-size:1.05rem}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.small{padding:8px 12px;font-size:.92rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* HUD */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--panel);border-bottom:1.5px solid var(--line)}
+.hud .wrap{display:flex;align-items:center;gap:14px;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.player{font-weight:600;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
+.stat small{color:var(--muted);font-size:.78rem}
+.stat b{font-family:'Chakra Petch',monospace;font-size:1.6rem;font-variant-numeric:tabular-nums}
+.stat.hot b{color:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.45}}
+.iconbtn{border:1.5px solid var(--line);background:var(--panel2);border-radius:10px;width:42px;height:42px;font-size:1.1rem}
+
+/* MAP */
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:18px 0 6px;border:2px solid var(--plan);border-radius:6px;overflow:hidden}
+.map div{padding:8px 10px;border-right:2px solid var(--plan);font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center;min-width:0}
+.map div:last-child{border-right:0}
+.map div span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.map .now{background:var(--safety);color:var(--safety-ink);font-weight:600}
+.map .done{color:var(--ok);font-weight:600}
+
+/* ROOM */
+.roomhead{display:flex;gap:16px;align-items:center;margin-top:18px}
+.roomicon{font-size:3rem;width:76px;height:76px;display:grid;place-items:center;border:2px dashed var(--plan);border-radius:12px;flex:none}
+.roomhead p{margin:0;color:var(--muted)}
+.roomhead h1{font-size:clamp(1.8rem,5vw,2.6rem)}
+.story{max-width:68ch;font-size:1.06rem;margin:14px 0 20px}
+.objects{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.obj{text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;transition:transform .12s,border-color .12s}
+.obj:hover{transform:translateY(-2px);border-color:var(--plan)}
+.obj .e{font-size:2.4rem;line-height:1}
+.obj .n{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:1.15rem}
+.obj .s{color:var(--muted);font-size:.9rem}
+.obj.solved{border-color:var(--ok)}
+.obj.solved .s{color:var(--ok);font-weight:600}
+.obj.door{border:0;background:repeating-linear-gradient(-45deg,var(--safety) 0 14px,var(--safety-ink) 14px 28px);padding:6px}
+.obj.door .inner{background:var(--panel);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;height:100%}
+.notes{margin:22px 0 40px}
+.notes h2{font-size:1.25rem;margin-bottom:10px}
+.notelist{display:flex;gap:12px;flex-wrap:wrap}
+.note{background:#fff6c9;color:#3b2f00;border-radius:4px;padding:10px 14px;min-width:150px;box-shadow:2px 4px 0 rgba(0,0,0,.12);transform:rotate(-1.2deg)}
+.note:nth-child(2n){transform:rotate(1.4deg)}
+.note small{display:block;opacity:.75}
+.note b{font-family:'Chakra Petch',monospace;font-size:1.8rem;letter-spacing:.12em}
+.note.empty{background:transparent;color:var(--muted);border:2px dashed var(--line);box-shadow:none;transform:none}
+
+/* MODAL */
+#modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(5,15,30,.62);padding:calc(env(safe-area-inset-top,0px) + 12px) 12px calc(env(safe-area-inset-bottom,0px) + 12px)}
+#modal.show{display:flex}
+.mpanel{background:var(--panel);color:var(--ink);border-radius:16px;width:100%;max-width:780px;max-height:100%;display:flex;flex-direction:column;box-shadow:var(--shadow);border:2px solid var(--line);animation:pop .18s ease-out}
+@keyframes pop{from{transform:scale(.97);opacity:0}}
+.mhead{display:flex;gap:12px;align-items:center;padding:16px 18px;border-bottom:1.5px solid var(--line)}
+.mhead .mo{font-size:2rem}
+.mhead p{margin:0;color:var(--muted);font-size:.9rem}
+.mhead h2{font-size:1.4rem}
+.mhead .x{margin-left:auto;flex:none}
+.mbody{padding:16px 18px;overflow-y:auto}
+.mbody .intro{margin-top:0}
+.mfoot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 18px;border-top:1.5px solid var(--line)}
+.mfoot .sp{flex:1}
+.msg{font-weight:600;font-size:.95rem}
+.msg.bad{color:var(--bad)}.msg.ok{color:var(--ok)}
+.hintbox{background:var(--panel2);border-left:4px solid var(--safety);padding:10px 14px;border-radius:6px;margin-top:14px}
+.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+/* match */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.match .col{display:flex;flex-direction:column;gap:8px}
+.match .col h4{margin:0 0 2px;font-size:.85rem;color:var(--muted);font-weight:600}
+.mi{text-align:left;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--panel2);display:flex;gap:8px;align-items:flex-start;font-size:.95rem;line-height:1.35;min-height:52px}
+.mi.sel{border-color:var(--safety);box-shadow:0 0 0 3px var(--safety)}
+.badge{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:.85rem;color:#fff}
+.badge.empty{border:2px dashed var(--line);background:transparent}
+
+/* quiz */
+.q{margin:0 0 16px}
+.q p{font-weight:600;margin:0 0 6px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.opt{text-align:left;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--panel2)}
+.opt.on{border-color:var(--plan);background:var(--plan);color:var(--panel)}
+
+/* sort */
+.sortrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.sortrow .t{font-weight:500}
+.seg{display:flex;border:2px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--panel2);padding:8px 12px;font-size:.9rem}
+.seg button+button{border-left:2px solid var(--line)}
+.seg button.on{background:var(--plan);color:var(--panel);font-weight:600}
+.pw{font-family:'Chakra Petch',monospace;font-size:1.05rem}
+
+/* order */
+.ord{display:flex;flex-direction:column;gap:8px;counter-reset:o}
+.oi{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--panel2)}
+.oi .num{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:1.2rem;color:var(--plan);text-align:center}
+.oi .ar{display:flex;gap:6px}
+.oi .ar button{width:40px;height:40px;border-radius:8px;border:1.5px solid var(--line);background:var(--panel)}
+.oi .ar button:disabled{opacity:.3;cursor:default}
+
+/* phish */
+.mail{border:2px solid var(--line);border-radius:10px;background:#fff;color:#1a1a1a;padding:16px;font-size:.98rem}
+.mail hr{border:0;border-top:1px solid #ccc;margin:10px 0}
+.mail .sp{height:10px}
+.ph{cursor:pointer;border-radius:4px;padding:1px 2px;transition:background .15s}
+.ph:hover{background:#fff1b8}
+.ph.found{background:#ffd6d9;outline:2px solid #c0262d}
+.ph.nope{background:#d9f2e6}
+.ph.link{color:#1a5fd0;text-decoration:underline}
+.flags{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.flags div{padding:8px 12px;border-radius:8px;background:var(--panel2);border-left:4px solid var(--bad);font-size:.93rem}
+
+/* reward */
+.reward{text-align:center}
+.reward .big{font-size:3.4rem}
+.reward h3{font-size:1.8rem;margin:4px 0 14px}
+.reward .note{display:inline-block;margin:0 auto 16px;transform:rotate(-2deg);text-align:left}
+.fact{max-width:56ch;margin:0 auto;color:var(--muted)}
+
+/* keypad */
+.keypad-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+.slots{display:flex;gap:8px}
+.slot{width:46px;height:58px;border-radius:8px;border:2px solid var(--line);background:#0b1626;color:#7dffb2;display:grid;place-items:center;font-family:'Chakra Petch',monospace;font-size:2rem}
+.keys{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.keys button{height:62px;border-radius:12px;border:2px solid var(--line);background:var(--panel2);font-family:'Chakra Petch',sans-serif;font-size:1.5rem;font-weight:600}
+.keys button:active{transform:scale(.95)}
+.keys .go{background:var(--ok);border-color:var(--ok);color:#fff}
+
+/* toast */
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);z-index:80;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(92vw,420px)}
+.toast{background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:10px;font-weight:600;box-shadow:var(--shadow);animation:pop .2s}
+.toast.plus{background:var(--ok);color:#fff}.toast.minus{background:var(--bad);color:#fff}
+
+/* end */
+.cert{max-width:640px;margin:5vh auto;padding:16px}
+.cert .card{text-align:center;padding:28px 22px}
+.cert .who{font-size:clamp(2rem,6vw,3rem);margin:8px 0}
+.cert .pts{font-family:'Chakra Petch',sans-serif;font-size:4.2rem;font-weight:700;color:var(--plan);line-height:1}
+.cert .rank{display:inline-block;margin:14px 0;padding:6px 14px;background:var(--safety);color:var(--safety-ink);border-radius:8px;font-weight:700;font-family:'Chakra Petch',sans-serif}
+.cert table{margin:10px auto 0;border-collapse:collapse;text-align:left}
+.cert td{padding:5px 14px;border-bottom:1px solid var(--line)}
+.cert td:last-child{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.cert .show{margin:18px 0 0;color:var(--muted)}
+
+@media (max-width:600px){
+  body{font-size:16px}
+  .match{grid-template-columns:1fr 1fr;gap:6px}
+  .mi{font-size:.85rem;padding:8px}
+  .sortrow{grid-template-columns:1fr}
+  .map div span.t{display:none}
+  .map div{justify-content:center}
+  .keys{grid-template-columns:repeat(3,64px)}
+  .stat b{font-size:1.3rem}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal" aria-live="polite"></div>
+<div id="toasts"></div>
+
+<script>
+/* ============ SATURS ============ */
+const ROOMS=[
+ {id:'r1',title:'Serveru telpa',sub:'Datora detaļas un datortīkli',icon:'🖥️',
+  story:'Tu pamosties skolas serveru telpā. Durvis ir aizcirtušās, un uz ekrāna mirgo ziņa: “Ēna bija šeit. Atrodi kodu, ja vari!” Serveri dūc, uz galda izmētātas datora detaļas, uz skapja salīmētas zīmītes…',
+  puzzles:['p1a','p1b'],code:'3815',doorObj:'🚪',doorName:'Elektroniskā durvju slēdzene'},
+ {id:'r2',title:'Gudrā māja',sub:'Lietu internets (IoT)',icon:'🏠',
+  story:'Aiz durvīm ir skolas demonstrācijas viedā māja. Gaismas mirgo pašas no sevis, termostats rāda 35 °C, robots putekļsūcējs riņķo pa apli. Ēna ir pārņēmis IoT ierīces! Atjauno kārtību un atrodi nākamo kodu.',
+  puzzles:['p2a','p2b'],code:'6290',doorObj:'🚪',doorName:'Viedās mājas durvju panelis'},
+ {id:'r3',title:'Signālu tornis',sub:'Interneta pieslēguma veidi',icon:'📡',
+  story:'Tu esi uzkāpis skolas jumta signālu tornī. Visi kabeļi atvienoti, antenas pagrieztas uz nepareizo pusi, un pa rāciju zvana cilvēki, kuriem pazudis internets. Savieno visu atpakaļ!',
+  puzzles:['p3a','p3b'],code:'7421',doorObj:'🪜',doorName:'Torņa lūkas slēdzene'},
+ {id:'r4',title:'Kiberdrošības seifs',sub:'Drošība internetā',icon:'🛡️',
+  story:'Pēdējā telpa. Priekšā milzīgs seifs ar 6 ciparu kodu — tajā ir izejas durvju atslēga. Ēna ir atstājis lamatas: vājas paroles un viltus e-pastu. Neiekrīti!',
+  puzzles:['p4a','p4b','p4c'],code:'053312',doorObj:'🔐',doorName:'Izejas seifs'}
+];
+
+const P={
+ p1a:{type:'match',obj:'🔧',objName:'Darba galds ar detaļām',title:'Saliec datoru',
+  intro:'Uz galda izmētātas datora detaļas, un blakus — zīmītes ar to uzdevumiem. Uzspied uz detaļas kreisajā pusē un tad uz tās uzdevuma labajā pusē.',
+  pairs:[
+   ['Procesors (CPU)','Veic aprēķinus — datora “smadzenes”'],
+   ['Operatīvā atmiņa (RAM)','Glabā datus, kamēr dators strādā; izslēdzot tie pazūd'],
+   ['SSD disks','Glabā failus ilgstoši, arī tad, kad dators izslēgts'],
+   ['Videokarte (GPU)','Apstrādā attēlus un grafiku, piemēram, spēlēm'],
+   ['Mātesplate','Savieno visas detaļas kopā'],
+   ['Barošanas bloks','Pārveido strāvu no rozetes datoram derīgā'],
+   ['Tīkla karte','Ļauj datoram pieslēgties tīklam']
+  ],
+  hint:'Padomā, kas notiek, izslēdzot datoru: RAM saturs pazūd, bet SSD saglabā failus. “Smadzenes” ir procesors, bet “visu savienotāja” ir mātesplate.',
+  reward:'38',fact:'Vai zināji? Pirmais elektroniskais dators ENIAC svēra ap 27 tonnām, bet tavs telefons ir tūkstošiem reižu jaudīgāks.'},
+ p1b:{type:'quiz',obj:'🗄️',objName:'Serveru skapis',title:'Zīmītes uz skapja',
+  intro:'Serveru skapis ir aizslēgts. Uz durtiņām salīmētas zīmītes ar jautājumiem. Atbildi uz visiem pareizi, lai skapis atvērtos!',
+  qs:[
+   {q:'Kā sauc tīklu vienas mājas, skolas vai biroja robežās?',o:['LAN (lokālais tīkls)','WAN (plašais tīkls)','Satelīts','Bluetooth'],a:0},
+   {q:'Kura ierīce savieno mājas tīklu ar internetu un sadala savienojumu visām ierīcēm?',o:['Monitors','Maršrutētājs (rūteris)','Printeris','Skaļrunis'],a:1},
+   {q:'Internets ir lielākais piemērs…',o:['LAN tīklam','WAN tīklam','Datora atmiņai','Operētājsistēmai'],a:1},
+   {q:'Kurā tīkla topoloģijā visi datori pieslēgti vienai centrālai ierīcei?',o:['Riņķa','Kopnes','Zvaigznes','Līnijas'],a:2},
+   {q:'Kas ir IP adrese?',o:['Datora parole','Ierīces unikālais numurs tīklā','E-pasta adrese','Wi-Fi tīkla nosaukums'],a:1},
+   {q:'Kādu kabeli parasti izmanto, lai datoru pieslēgtu tīklam ar vadu?',o:['HDMI','Ethernet (RJ-45)','Austiņu 3,5 mm','Barošanas kabeli'],a:1}
+  ],
+  hint:'LAN — Local (vietējais), WAN — Wide (plašais). Zvaigznes topoloģijā viss savienots ar centru kā zvaigznes stari.',
+  reward:'15',fact:'Vai zināji? Maršrutētājs katrai ierīcei mājās piešķir savu IP adresi — tāpat kā katrai mājai ielā ir savs numurs.'},
+ p2a:{type:'sort',obj:'📦',objName:'Plaukts ar ierīcēm',title:'Kas ir IoT?',
+  intro:'Ēna sajaucis ierīces. Atrodi, kuras ir IoT (lietu internets) ierīces — tās ir pieslēgtas internetam un var sūtīt vai saņemt datus pašas.',
+  bins:['IoT','Nav IoT'],
+  items:[['Viedais termostats',0],['Viedpulkstenis',0],['Viedā spuldze',0],['Video durvju zvans',0],['Robots putekļsūcējs ar lietotni',0],['Viedais skaļrunis',0],
+   ['Mehānisks modinātājpulkstenis',1],['Parasts kalkulators',1],['Papīra kalendārs',1],['Lukturītis ar baterijām',1]],
+  hint:'Jautā sev: vai šo lietu var vadīt vai uzraudzīt ar telefonu caur internetu? Ja tai nav ne Wi-Fi, ne cita tīkla — tā nav IoT.',
+  reward:'62',fact:'IoT = Internet of Things jeb lietu internets: ikdienas lietas ar sensoriem, kas pieslēgtas internetam. Pasaulē to jau ir vairāk nekā cilvēku!'},
+ p2b:{type:'order',obj:'🪴',objName:'Viedais puķu pods',title:'Datu ceļojums',
+  intro:'Viedais puķu pods ziņo, ka puķei vajag ūdeni, bet Ēna sajaucis soļus. Sakārto, kādā secībā dati ceļo no augsnes līdz tavam telefonam! (Izmanto bultiņas ▲▼.)',
+  steps:['Mitruma sensors izmēra, ka augsne ir sausa','Mikrokontrolieris apstrādā mērījumu','Dati pa Wi-Fi aizceļo līdz maršrutētājam','Dati nonāk mākonī (serverī internetā)','Telefonā atnāk paziņojums: “Aplej mani!”'],
+  hint:'Viss sākas ar mērījumu (sensors) un beidzas ar to, ko tu redzi telefonā. Pa vidu — apstrāde, Wi-Fi un mākonis.',
+  reward:'90',fact:'Sensors mēra (temperatūru, mitrumu, kustību), bet izpildmehānisms (piemēram, ūdens sūknis vai motors) rīkojas.'},
+ p3a:{type:'match',obj:'🔌',objName:'Kabeļu sadales kaste',title:'Pievieno kabeļus',
+  intro:'Visi kabeļi atvienoti. Savieno katru interneta pieslēguma veidu ar pareizo aprakstu!',
+  pairs:[
+   ['Optiskā šķiedra','Dati ceļo kā gaismas impulsi pa plānām stikla šķiedrām'],
+   ['DSL','Internets pa veco telefona vara līniju'],
+   ['Mobilais internets (4G/5G)','Signāls no bāzes stacijas torņa uz telefonu vai modemu'],
+   ['Satelīta internets','Signāls no kosmosa; der attālās vietās, bet ar lielāku aizkavi'],
+   ['Kabeļinternets (koaksiālais)','Internets pa to pašu kabeli, pa kuru nāk kabeļtelevīzija'],
+   ['Wi-Fi','Bezvadu savienojums mājās no maršrutētāja līdz ierīcei']
+  ],
+  hint:'Koaksiālais kabelis nāk no televīzijas. DSL izmanto telefona līniju. Optika izmanto gaismu. Wi-Fi strādā tikai mājas tīkla iekšienē.',
+  reward:'74',fact:'Latvija ir viena no Eiropas valstīm, kur optiskais internets ir ļoti plaši pieejams.'},
+ p3b:{type:'quiz',obj:'📻',objName:'Rācija ar zvaniem',title:'Palīdzības zvani',
+  intro:'Pa rāciju zvana cilvēki ar interneta problēmām. Palīdzi visiem, lai atvērtos torņa lūka!',
+  qs:[
+   {q:'Ģimene dzīvo viensētā dziļi mežā: nav kabeļu, nav mobilā signāla. Kas viņiem palīdzēs?',o:['DSL','Optiskā šķiedra','Satelīta internets','Bluetooth'],a:2},
+   {q:'Kādās vienībās parasti mēra interneta ātrumu?',o:['km/h','Mbit/s','°C','Vatos'],a:1},
+   {q:'Kurš no šiem parasti ir visātrākais pieslēgums mājai?',o:['Iezvanpieeja (modems)','DSL','Optiskā šķiedra','3G'],a:2},
+   {q:'Tu brauc autobusā un gribi skatīties video. Ko izmantosi?',o:['Mobilo internetu (4G/5G)','Optisko kabeli','Kabeļtelevīziju','DSL'],a:0},
+   {q:'Ko nozīmē “ping” jeb aizture?',o:['Faila izmēru','Laiku, kurā signāls aiziet un atgriežas','Baterijas līmeni','Ekrāna spilgtumu'],a:1},
+   {q:'Starp rūteri un datoru ir biezas betona sienas. Kas notiks ar Wi-Fi?',o:['Signāls kļūs stiprāks','Nekas nemainīsies','Signāls kļūs vājāks','Dators izslēgsies'],a:2}
+  ],
+  hint:'Ping ir laiks turp un atpakaļ milisekundēs. Ātrumu mēra megabitos sekundē. Kur nav vadu un torņu, palīdz kosmoss.',
+  reward:'21',fact:'Ātrums (Mbit/s) un aizture (ping, ms) ir dažādas lietas — datorspēlēm bieži svarīgāks ir mazs ping!'},
+ p4a:{type:'sort',obj:'🔑',objName:'Paroļu atslēgu kaste',title:'Drošas paroles',
+  intro:'Seifa pirmā daļa atveras tikai tad, ja atšķirsi drošas paroles no nedrošām.',
+  bins:['Droša','Nedroša'],pw:true,
+  items:[['Zils-Zirgs!Lec7Reizes',0],['Trīs$Kaķi_Dzer_Kakao!',0],['Ziema+Sniegs=7Pikas?',0],
+   ['123456',1],['parole',1],['Anna2012',1],['qwerty',1],['futbols',1],['Rexis',1]],
+  hint:'Drošai parolei ir garums (vismaz 12 simboli), dažādi simboli un nav personīgas informācijas (vārda, dzimšanas gada, mājdzīvnieka vārda).',
+  reward:'05',fact:'Gara frāze no vairākiem vārdiem ar simboliem ir gan droša, gan viegli iegaumējama.'},
+ p4b:{type:'phish',obj:'📧',objName:'Aizdomīgs e-pasts',title:'Atmasko krāpnieku',
+  intro:'Seifa ekrānā atvērts e-pasts. Tajā ir 5 pikšķerēšanas (phishing) pazīmes. Uzspied uz katras aizdomīgās vietas! Ja uzspiedīsi uz normāla teksta, zaudēsi punktus.',
+  parts:[
+   {t:'No: ',plain:1},{t:'Instagram atbalsts <drosiba@instagrarn-help.xyz>',f:'Sūtītāja adrese ir viltota: “instagrarn” (r+n, nevis m) un dīvains domēns .xyz.'},{br:1},
+   {t:'Datums: ',plain:1},{t:'šodien, 08:14',bad:1},{br:1},
+   {t:'Tēma: ',plain:1},{t:'STEIDZAMI!!! Tavs konts tiks dzēsts pēc 1 stundas',f:'Steidzināšana un draudi — krāpnieki grib, lai tu rīkojies, nepadomājis.'},{hr:1},
+   {t:'Sveiks, cienījamais lietotāj!',f:'Vispārīga uzruna — īsts serviss zinātu tavu lietotājvārdu.'},{sp:1},
+   {t:'Mēs pamanījām jaunu pieslēgšanos tavam kontam.',bad:1},{t:' ',plain:1},
+   {t:'Lai saglabātu kontu, atsūti mums savu paroli vai ievadi to šeit:',f:'Neviens īsts serviss NEKAD neprasa tavu paroli!'},{sp:1},
+   {t:'www.instagram-konts-glabsana.ru/login',link:1,f:'Saite ved uz svešu lapu, nevis uz instagram.com.'},{sp:1},
+   {t:'Paldies, ka izmanto mūsu pakalpojumus.',bad:1},{br:1},{t:'Instagram komanda',bad:1}
+  ],
+  hint:'Meklē: dīvainu sūtītāja adresi, steidzināšanu, vispārīgu uzrunu, paroles prasīšanu un aizdomīgu saiti.',
+  reward:'33',fact:'Ja šaubies par e-pastu — neklikšķini uz saites! Atver lietotni vai mājaslapu pats un pastāsti pieaugušajam.'},
+ p4c:{type:'quiz',obj:'📜',objName:'Plakāts pie seifa',title:'Drošības noteikumi',
+  intro:'Uz plakāta pie seifa ir pēdējie jautājumi. Atbildi pareizi, lai iegūtu pēdējos divus ciparus!',
+  qs:[
+   {q:'Kas ir divpakāpju autentifikācija?',o:['Divas vienādas paroles','Papildu pārbaude, piemēram, kods telefonā','Divi datori vienā tīklā','Paroles maiņa divreiz gadā'],a:1},
+   {q:'Draugs lūdz tavu spēles paroli, lai “palīdzētu uzkrāt punktus”. Ko darīsi?',o:['Iedošu, mēs taču draugi','Iedošu tikai uz vienu dienu','Nedošu — parole ir tikai mana','Ierakstīšu to klases čatā'],a:2},
+   {q:'Kāds tev sūta aizskarošas ziņas internetā. Ko vislabāk darīt?',o:['Atbildēt vēl rupjāk','Saglabāt ekrānuzņēmumus, bloķēt un pastāstīt pieaugušajam','Izdzēst savu kontu un nevienam neteikt','Pārsūtīt ziņas visai klasei'],a:1},
+   {q:'Kafejnīcā ir bezmaksas Wi-Fi bez paroles. Ko tur labāk nedarīt?',o:['Lasīt ziņas','Skatīties laika prognozi','Ievadīt paroles vai bankas datus','Meklēt recepti'],a:2}
+  ],
+  hint:'Paroli nedod nevienam, pat labākajam draugam. Ja internetā kaut kas nav kārtībā — pastāsti pieaugušajam.',
+  reward:'12',fact:'Ieslēdz divpakāpju autentifikāciju visur, kur var — tā ir kā otra slēdzene tavām durvīm.'}
+};
+const PTS={solve:100,wrong:-10,hint:-25,phishWrong:-5,doorWrong:-5,door:50,perMin:5};
+const HUES=[205,30,140,280,350,55,175,250];
+
+/* ============ STĀVOKLIS ============ */
+const KEY='izlausanas-it-8kl-v1';
+const params=new URLSearchParams(location.search);
+const LIMIT_MIN=Math.min(120,Math.max(10,parseInt(params.get('laiks'),10)||45));
+let S=load(), screen=(S&&!S.finished)?'start':(S&&S.finished?'end':'start'), cur=null, sound=true;
+function load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function wipe(){try{localStorage.removeItem(KEY)}catch(e){}}
+function fresh(name){return{name,start:Date.now(),score:0,room:0,solved:{},hints:{},mistakes:0,hintCount:0,opened:{},finished:false,end:null,timeUp:false,bonus:0,limit:LIMIT_MIN}}
+const app=document.getElementById('app'), modal=document.getElementById('modal');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function roomOf(pid){return ROOMS.find(r=>r.puzzles.includes(pid))}
+function fragLabel(pid){const i=roomOf(pid).puzzles.indexOf(pid);return `${i*2+1}. un ${i*2+2}. cipars`}
+
+/* ============ SKAŅA ============ */
+let ac=null;
+function beep(seq){if(!sound)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();let t=ac.currentTime;seq.forEach(([f,d,type])=>{const o=ac.createOscillator(),g=ac.createGain();o.type=type||'square';o.frequency.value=f;g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d);t+=d*.9});}catch(e){}}
+const sOk=()=>beep([[660,.1],[880,.1],[1320,.18]]), sBad=()=>beep([[180,.25,'sawtooth']]), sClick=()=>beep([[1000,.03]]);
+
+/* ============ PUNKTI UN PAZIŅOJUMI ============ */
+function toast(txt,kind){const t=document.createElement('div');t.className='toast '+(kind||'');t.textContent=txt;document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),2400)}
+function pts(n,why){S.score=Math.max(0,S.score+n);save();toast((n>0?'+':'')+n+' punkti · '+why,n>0?'plus':'minus');const el=document.getElementById('score');if(el)el.textContent=S.score}
+
+/* ============ TAIMERIS ============ */
+function remaining(){return S.limit*60000-(Date.now()-S.start)}
+function fmt(ms){ms=Math.max(0,ms);const m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000);return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+setInterval(()=>{if(screen!=='game'||!S||S.finished)return;const r=remaining();const el=document.getElementById('timer');if(el){el.textContent=fmt(r);el.parentElement.classList.toggle('hot',r<5*60000)}if(r<=0)timeUp()},1000);
+function timeUp(){S.finished=true;S.timeUp=true;S.end=S.start+S.limit*60000;save();closeModal();beep([[300,.3,'sawtooth'],[200,.5,'sawtooth']]);screen='end';render()}
+function finish(){S.end=Date.now();const min=Math.floor(Math.max(0,remaining())/60000);S.bonus=min*PTS.perMin;S.score+=S.bonus;S.finished=true;save();closeModal();beep([[523,.12],[659,.12],[784,.12],[1047,.4]]);screen='end';render()}
+
+/* ============ EKRĀNI ============ */
+function render(){if(screen==='start')renderStart();else if(screen==='game')renderGame();else renderEnd();window.scrollTo(0,0)}
+
+function renderStart(){
+ const resume=S&&!S.finished;
+ app.innerHTML=`<div class="start">
+  <h1>Izlaušanās istaba: Ēnas tīkls</h1>
+  <p class="lead">Hakeris ar segvārdu “Ēna” ir aizslēdzis skolas tehnoloģiju korpusu. Tev ir ${LIMIT_MIN} minūtes, lai izietu cauri četrām telpām un izkļūtu ārā.</p>
+  <div class="tape" aria-hidden="true"></div>
+  <div class="card">
+   <h2 style="font-size:1.3rem;margin-bottom:8px">Kā spēlēt</h2>
+   <ul class="rules">
+    <li>Katrā telpā uzspied uz priekšmetiem un atrisini uzdevumus.</li>
+    <li>Par katru atrisinātu uzdevumu saņemsi zīmīti ar diviem cipariem.</li>
+    <li>Saliec ciparus kopā un ievadi kodu pie durvīm, lai tiktu tālāk.</li>
+    <li>Atrisināts uzdevums +100, atvērtas durvis +50, nepareiza pārbaude −10, padoms −25.</li>
+    <li>Ja izkļūsi ātrāk, par katru atlikušo minūti +5 bonuss.</li>
+   </ul>
+   ${resume?`<p style="margin:18px 0 8px">Šajā ierīcē jau notiek spēle: <b>${esc(S.name)}</b>, ${S.score} punkti.</p>
+    <div class="row"><button class="btn primary" data-act="resume">Turpināt spēli</button><button class="btn" data-act="newplayer">Sākt kā cits spēlētājs</button></div>`
+   :`<div class="field"><input id="nm" maxlength="30" placeholder="Tavs vārds vai komandas nosaukums" autocomplete="off"><button class="btn primary" data-act="start">Ieiet pirmajā telpā</button></div>`}
+  </div></div>`;
+ const nm=document.getElementById('nm');if(nm){nm.focus();nm.addEventListener('keydown',e=>{if(e.key==='Enter')act('start')})}
+}
+
+function renderGame(){
+ const r=ROOMS[S.room], ri=S.room;
+ const map=ROOMS.map((x,i)=>`<div class="${i===ri?'now':(i<ri?'done':'')}" title="${esc(x.title)}">${i<ri?'✓':x.icon}<span class="t">${esc(x.title)}</span></div>`).join('');
+ const objs=r.puzzles.map(pid=>{const p=P[pid],ok=S.solved[pid];return `<button class="obj ${ok?'solved':''}" data-act="open" data-id="${pid}"><span class="e">${p.obj}</span><span class="n">${esc(p.objName)}</span><span class="s">${ok?'✓ Atrisināts':'Apskatīt'}</span></button>`}).join('');
+ const opened=S.opened[r.id];
+ const door=`<button class="obj door" data-act="door"><span class="inner"><span class="e">${r.doorObj}</span><span class="n">${esc(r.doorName)}</span><span class="s">${opened?'Atvērts — ej tālāk':r.code.length+' ciparu kods'}</span></span></button>`;
+ const notes=r.puzzles.map(pid=>S.solved[pid]?`<div class="note"><small>${fragLabel(pid)}</small><b>${P[pid].reward}</b></div>`:`<div class="note empty"><small>${fragLabel(pid)}</small><b>??</b></div>`).join('');
+ app.innerHTML=`<header class="hud"><div class="wrap">
+   <span class="player">👤 ${esc(S.name)}</span>
+   <div class="stat"><small>Atlikušais laiks</small><b id="timer">${fmt(remaining())}</b></div>
+   <div class="stat"><small>Punkti</small><b id="score">${S.score}</b></div>
+   <button class="iconbtn" data-act="sound" aria-label="Skaņa">${sound?'🔊':'🔇'}</button>
+  </div></header>
+  <main class="wrap">
+   <nav class="map" aria-label="Telpu karte">${map}</nav>
+   <div class="roomhead"><div class="roomicon">${r.icon}</div><div><p>${ri+1}. telpa no ${ROOMS.length} · ${esc(r.sub)}</p><h1>${esc(r.title)}</h1></div></div>
+   <p class="story">${esc(r.story)}</p>
+   <div class="objects">${objs}${door}</div>
+   <section class="notes"><h2>Tavas zīmītes šajā telpā</h2><div class="notelist">${notes}</div></section>
+  </main>`;
+}
+
+function renderEnd(){
+ const solved=Object.keys(S.solved).length, total=Object.keys(P).length;
+ const rooms=Object.keys(S.opened).length;
+ const used=fmt((S.end||Date.now())-S.start);
+ const sc=S.score;
+ const rank=sc>=1150?'Kiberdrošības ģēnijs':sc>=900?'Tīkla meistars':sc>=600?'IT detektīvs':sc>=300?'Jaunais pētnieks':'Iesācējs hakeru medībās';
+ app.innerHTML=`<div class="cert"><div class="card">
+  <div style="font-size:3rem">${S.timeUp?'⏰':'🏆'}</div>
+  <h2 style="font-size:1.4rem">${S.timeUp?'Laiks beidzās!':'Tu izlauzies brīvībā!'}</h2>
+  <div class="who disp">${esc(S.name)}</div>
+  <div class="pts">${sc}</div><div style="color:var(--muted)">punkti</div>
+  <div class="rank">${rank}</div>
+  <table>
+   <tr><td>Atrisināti uzdevumi</td><td>${solved} / ${total}</td></tr>
+   <tr><td>Atvērtās durvis</td><td>${rooms} / ${ROOMS.length}</td></tr>
+   <tr><td>Izmantotais laiks</td><td>${used}</td></tr>
+   <tr><td>Nepareizi mēģinājumi</td><td>${S.mistakes}</td></tr>
+   <tr><td>Izmantotie padomi</td><td>${S.hintCount}</td></tr>
+   <tr><td>Laika bonuss</td><td>+${S.bonus}</td></tr>
+  </table>
+  <p class="show">Parādi šo ekrānu skolotājam!</p>
+  <button class="btn" style="margin-top:12px" data-act="newplayer">Jauns spēlētājs</button>
+ </div></div>`;
+}
+
+/* ============ MODĀLIS ============ */
+function openPuzzle(pid){cur={pid,msg:'',mk:''};const p=P[pid];
+ if(p.type==='match'){cur.right=shuffle(p.pairs.map((_,i)=>i));cur.assign={};cur.sel=null}
+ if(p.type==='quiz'){cur.ans={}}
+ if(p.type==='sort'){cur.order=shuffle(p.items.map((_,i)=>i));cur.place={}}
+ if(p.type==='order'){let l;do{l=shuffle(p.steps.map((_,i)=>i))}while(l.every((v,i)=>v===i));cur.list=l}
+ if(p.type==='phish'){cur.found={};cur.nope={}}
+ renderModal()}
+function closeModal(){modal.classList.remove('show');modal.innerHTML='';document.body.classList.remove('lock');cur=null;if(screen==='game')renderGame()}
+function renderModal(shakeIt){
+ const old=modal.querySelector('.mbody'),st=old?old.scrollTop:0;
+ modal.innerHTML=cur.door?doorHTML():puzzleHTML();
+ modal.classList.add('show');document.body.classList.add('lock');
+ const nb=modal.querySelector('.mbody');if(nb)nb.scrollTop=st;
+ if(shakeIt){const pn=modal.querySelector('.mpanel');pn.classList.add('shake')}
+}
+function head(o,small,title){return `<div class="mhead"><span class="mo">${o}</span><div><p>${esc(small)}</p><h2>${esc(title)}</h2></div><button class="iconbtn x" data-act="close" aria-label="Aizvērt">✕</button></div>`}
+
+function puzzleHTML(){
+ const pid=cur.pid,p=P[pid];
+ if(S.solved[pid]){
+  return `<div class="mpanel" role="dialog" aria-modal="true">${head(p.obj,p.objName,p.title)}
+   <div class="mbody reward"><div class="big">🔓</div><h3>Atvērās!</h3>
+   <div class="note"><small>Zīmīte: ${fragLabel(pid)}</small><b>${p.reward}</b></div>
+   <p class="fact">💡 ${esc(p.fact)}</p></div>
+   <div class="mfoot"><span class="sp"></span><button class="btn primary" data-act="close">Atpakaļ telpā</button></div></div>`}
+ let body='';
+ if(p.type==='match'){
+  const lh=p.pairs.map((pr,i)=>{const a=cur.assign[i]!==undefined;return `<button class="mi ${cur.sel===i?'sel':''}" data-act="mL" data-i="${i}"><span class="badge" style="background:hsl(${HUES[i%8]} 65% 45%)">${i+1}</span><span>${esc(pr[0])}</span></button>`}).join('');
+  const rh=cur.right.map(ri=>{const li=Object.keys(cur.assign).find(k=>cur.assign[k]===ri);return `<button class="mi" data-act="mR" data-i="${ri}">${li!==undefined?`<span class="badge" style="background:hsl(${HUES[li%8]} 65% 45%)">${+li+1}</span>`:'<span class="badge empty"></span>'}<span>${esc(p.pairs[ri][1])}</span></button>`}).join('');
+  body=`<div class="match"><div class="col"><h4>Izvēlies</h4>${lh}</div><div class="col"><h4>Savieno ar</h4>${rh}</div></div>`;
+ }
+ if(p.type==='quiz'){
+  body=p.qs.map((q,qi)=>`<div class="q"><p>${qi+1}. ${esc(q.q)}</p><div class="opts">${q.o.map((o,oi)=>`<button class="opt ${cur.ans[qi]===oi?'on':''}" data-act="qa" data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join('')}</div></div>`).join('');
+ }
+ if(p.type==='sort'){
+  body=cur.order.map(ii=>`<div class="sortrow"><span class="t ${p.pw?'pw':''}">${esc(p.items[ii][0])}</span><div class="seg">${p.bins.map((b,bi)=>`<button class="${cur.place[ii]===bi?'on':''}" data-act="so" data-i="${ii}" data-b="${bi}">${bi===0?'✅':'❌'} ${esc(b)}</button>`).join('')}</div></div>`).join('');
+ }
+ if(p.type==='order'){
+  body=`<div class="ord">${cur.list.map((si,pos)=>`<div class="oi"><span class="num">${pos+1}</span><span>${esc(p.steps[si])}</span><span class="ar"><button data-act="up" data-i="${pos}" ${pos===0?'disabled':''} aria-label="Uz augšu">▲</button><button data-act="dn" data-i="${pos}" ${pos===cur.list.length-1?'disabled':''} aria-label="Uz leju">▼</button></span></div>`).join('')}</div>`;
+ }
+ if(p.type==='phish'){
+  const total=p.parts.filter(x=>x.f).length, nf=Object.keys(cur.found).length;
+  const mail=p.parts.map((x,i)=>{if(x.br)return'<br>';if(x.hr)return'<hr>';if(x.sp)return'<div class="sp"></div>';if(x.plain)return esc(x.t);
+   const cls=['ph',x.link?'link':'',cur.found[i]?'found':'',cur.nope[i]?'nope':''].join(' ');return `<span class="${cls}" data-act="ph" data-i="${i}" role="button" tabindex="0">${esc(x.t)}</span>`}).join('');
+  const fl=Object.keys(cur.found).map(i=>`<div>🚩 ${esc(p.parts[i].f)}</div>`).join('');
+  body=`<div class="mail">${mail}</div><p style="font-weight:600;margin:12px 0 0">Atrastas pazīmes: ${nf} no ${total}</p><div class="flags">${fl}</div>`;
+ }
+ const hint=S.hints[pid]?`<div class="hintbox">💡 ${esc(p.hint)}</div>`:'';
+ const checkBtn=p.type==='phish'?'':`<button class="btn primary" data-act="check">Pārbaudīt</button>`;
+ return `<div class="mpanel" role="dialog" aria-modal="true">${head(p.obj,p.objName,p.title)}
+  <div class="mbody"><p class="intro">${esc(p.intro)}</p>${body}${hint}</div>
+  <div class="mfoot">${S.hints[pid]?'':`<button class="btn small" data-act="hint">💡 Padoms (${PTS.hint})</button>`}<span class="msg ${cur.mk}">${esc(cur.msg)}</span><span class="sp"></span>${checkBtn}</div></div>`;
+}
+
+function doorHTML(){
+ const r=ROOMS[S.room];
+ if(S.opened[r.id]){
+  return `<div class="mpanel" role="dialog" aria-modal="true">${head(r.doorObj,r.title,r.doorName)}
+   <div class="mbody reward"><div class="big">🚪✨</div><h3>Durvis atvērās!</h3><p class="fact">Tu esi gatavs nākamajai telpai: ${esc(ROOMS[S.room+1].title)}.</p></div>
+   <div class="mfoot"><span class="sp"></span><button class="btn primary" data-act="next">Ieiet nākamajā telpā</button></div></div>`}
+ const n=r.code.length,slots=Array.from({length:n},(_,i)=>`<div class="slot">${cur.entry[i]||''}</div>`).join('');
+ const keys=['1','2','3','4','5','6','7','8','9','⌫','0','OK'].map(k=>`<button class="${k==='OK'?'go':''}" data-act="key" data-k="${k}">${k}</button>`).join('');
+ return `<div class="mpanel" role="dialog" aria-modal="true" style="max-width:440px">${head(r.doorObj,r.title,r.doorName)}
+  <div class="mbody"><div class="keypad-wrap"><p style="margin:0;text-align:center;color:var(--muted)">Ievadi ${n} ciparu kodu no savām zīmītēm (secībā pēc numuriem).</p>
+  <div class="slots">${slots}</div><div class="keys">${keys}</div><span class="msg ${cur.mk}">${esc(cur.msg)}</span></div></div></div>`;
+}
+
+/* ============ PĀRBAUDES ============ */
+function wrong(msg){S.mistakes++;pts(PTS.wrong,'nepareizi');cur.msg=msg;cur.mk='bad';sBad();save();renderModal(true)}
+function solve(pid){S.solved[pid]=true;save();sOk();pts(PTS.solve,'uzdevums atrisināts');cur.msg='';renderModal()}
+function check(){
+ const pid=cur.pid,p=P[pid];
+ if(p.type==='match'){const n=p.pairs.length,a=Object.keys(cur.assign).length;if(a<n){cur.msg='Vispirms savieno visus pārus!';cur.mk='bad';return renderModal(true)}
+  const c=p.pairs.filter((_,i)=>cur.assign[i]===i).length;c===n?solve(pid):wrong(`Pareizi ${c} no ${n}. Slēdzene neatveras!`)}
+ if(p.type==='quiz'){const n=p.qs.length;if(Object.keys(cur.ans).length<n){cur.msg='Atbildi uz visiem jautājumiem!';cur.mk='bad';return renderModal(true)}
+  const c=p.qs.filter((q,i)=>cur.ans[i]===q.a).length;c===n?solve(pid):wrong(`Pareizas ${c} no ${n}. Mēģini vēlreiz!`)}
+ if(p.type==='sort'){const n=p.items.length;if(Object.keys(cur.place).length<n){cur.msg='Sašķiro visas!';cur.mk='bad';return renderModal(true)}
+  const c=p.items.filter((it,i)=>cur.place[i]===it[1]).length;c===n?solve(pid):wrong(`Pareizi ${c} no ${n}. Kaut kas vēl nav vietā!`)}
+ if(p.type==='order'){const c=cur.list.filter((v,i)=>v===i).length,n=cur.list.length;c===n?solve(pid):wrong(`Pareizā vietā ${c} no ${n} soļiem.`)}
+}
+
+/* ============ DARBĪBAS ============ */
+function act(a,d){
+ d=d||{};
+ if(a==='start'){const v=(document.getElementById('nm').value||'').trim();if(!v){const f=document.querySelector('.field');f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake');return}
+  S=fresh(v);save();screen='game';sClick();render();return}
+ if(a==='resume'){screen='game';render();return}
+ if(a==='newplayer'){if(S&&!confirm('Vai tiešām sākt no jauna? Šīs ierīces iepriekšējā spēle tiks dzēsta.'))return;wipe();S=null;screen='start';render();return}
+ if(a==='sound'){sound=!sound;renderGame();return}
+ if(!S||S.finished)return;
+ if(a==='open'){sClick();openPuzzle(d.id);return}
+ if(a==='door'){sClick();cur={door:true,entry:'',msg:'',mk:''};renderModal();return}
+ if(a==='close'){closeModal();return}
+ if(a==='next'){S.room++;save();closeModal();window.scrollTo(0,0);beep([[400,.08],[600,.08],[800,.15]]);return}
+ if(a==='key'){const r=ROOMS[S.room];sClick();
+  if(d.k==='⌫'){cur.entry=cur.entry.slice(0,-1)}
+  else if(d.k==='OK'){if(cur.entry===r.code){S.opened[r.id]=true;save();sOk();pts(PTS.door,'durvis atvērtas');if(S.room===ROOMS.length-1){finish();return}cur.msg='';renderModal();return}
+   if(cur.entry.length<r.code.length){cur.msg='Kods ir par īsu!';cur.mk='bad';renderModal(true);return}
+   S.mistakes++;pts(PTS.doorWrong,'nepareizs kods');sBad();cur.msg='Nepareizs kods!';cur.mk='bad';cur.entry='';renderModal(true);return}
+  else if(cur.entry.length<r.code.length){cur.entry+=d.k}
+  cur.msg='';renderModal();return}
+ if(!cur||!cur.pid||S.solved[cur.pid])return;
+ const p=P[cur.pid];
+ if(a==='hint'){S.hints[cur.pid]=true;S.hintCount++;pts(PTS.hint,'padoms');renderModal();return}
+ if(a==='check'){check();return}
+ cur.msg='';cur.mk='';
+ if(a==='mL'){const i=+d.i;cur.sel=cur.sel===i?null:i;sClick();renderModal();return}
+ if(a==='mR'){const ri=+d.i;const owner=Object.keys(cur.assign).find(k=>cur.assign[k]===ri);
+  if(cur.sel===null){if(owner!==undefined){delete cur.assign[owner]}else{cur.msg='Vispirms izvēlies detaļu kreisajā pusē.';cur.mk='bad'}}
+  else{if(owner!==undefined)delete cur.assign[owner];cur.assign[cur.sel]=ri;cur.sel=null;sClick()}
+  renderModal();return}
+ if(a==='qa'){cur.ans[+d.q]=+d.o;sClick();renderModal();return}
+ if(a==='so'){cur.place[+d.i]=+d.b;sClick();renderModal();return}
+ if(a==='up'||a==='dn'){const i=+d.i,j=a==='up'?i-1:i+1;[cur.list[i],cur.list[j]]=[cur.list[j],cur.list[i]];sClick();renderModal();return}
+ if(a==='ph'){const i=+d.i,x=p.parts[i];if(cur.found[i])return;
+  if(x.f){cur.found[i]=true;beep([[880,.08],[1100,.1]]);const total=p.parts.filter(y=>y.f).length;
+   if(Object.keys(cur.found).length===total){solve(cur.pid);return}renderModal()}
+  else{cur.nope[i]=true;S.mistakes++;pts(PTS.phishWrong,'tas ir normāls teksts');sBad();renderModal(true)}
+  return}
+}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;if(e.target===modal)return;act(el.dataset.act,el.dataset)});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&modal.classList.contains('show')){closeModal();return}
+ if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('ph')){e.preventDefault();act('ph',e.target.dataset);return}
+ if(cur&&cur.door&&modal.classList.contains('show')){if(/^[0-9]$/.test(e.key))act('key',{k:e.key});else if(e.key==='Backspace')act('key',{k:'⌫'});else if(e.key==='Enter'&&e.target.tagName!=='BUTTON')act('key',{k:'OK'})}
+});
+render();
+</script>
+</body>
+</html>
